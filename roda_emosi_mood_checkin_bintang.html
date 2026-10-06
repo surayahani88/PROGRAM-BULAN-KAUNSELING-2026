@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Roda Emosi & Mood Check-In</title>
+<style>
+:root{--ink:#17324d;--card:#fff;--bg:#eaf8ff}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(#bfeeff,#fff7d8);color:var(--ink);min-height:100vh}
+header{text-align:center;padding:24px 16px 10px}
+h1{margin:0;font-size:clamp(32px,7vw,64px);color:#1558a6;text-shadow:2px 2px #fff}
+.subtitle{font-weight:700;font-size:clamp(16px,3vw,24px)}
+.wrap{max-width:1100px;margin:auto;padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.card{background:#fff;border-radius:28px;padding:22px;box-shadow:0 10px 30px #1769aa22;border:4px solid #fff}
+h2{text-align:center;margin:4px 0 18px;color:#8a3ffc}
+.wheelbox{position:relative;width:min(78vw,430px);aspect-ratio:1;margin:auto}
+canvas{width:100%;height:100%;filter:drop-shadow(0 8px 8px #0002)}
+.pointer{position:absolute;top:-6px;left:50%;transform:translateX(-50%);font-size:48px;z-index:2;color:#e63946}
+button{border:0;border-radius:999px;padding:14px 24px;font-size:18px;font-weight:800;cursor:pointer;background:#ffd43b;color:#17324d;box-shadow:0 5px 0 #e2a900}
+button:active{transform:translateY(3px);box-shadow:0 2px 0 #e2a900}
+.center{text-align:center;margin-top:16px}
+.result{font-size:22px;font-weight:800;min-height:34px;margin-top:12px}
+.moods{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.mood{border:3px solid transparent;border-radius:18px;padding:10px 4px;text-align:center;background:#f5f8ff;cursor:pointer;transition:.15s}
+.mood:hover,.mood.selected{transform:translateY(-3px);border-color:#4d96ff;background:#e9f3ff}
+.emoji{font-size:38px}.label{font-weight:800;font-size:14px}
+label{font-weight:800;display:block;margin:16px 0 7px}
+select,textarea,input{width:100%;padding:12px;border:2px solid #b9d8ee;border-radius:14px;font-size:16px}
+textarea{min-height:90px;resize:vertical}
+.message{display:none;margin-top:16px;padding:15px;border-radius:16px;background:#e9ffe9;font-weight:700;text-align:center}.starbox{text-align:center;margin:12px 0;padding:12px;background:#fff8d8;border:2px solid #ffd43b;border-radius:18px}.starcount{font-size:30px;letter-spacing:3px}.reward{font-size:18px;font-weight:900;color:#8a3ffc}
+.stats{grid-column:1/-1}
+.barrow{display:grid;grid-template-columns:120px 1fr 45px;gap:10px;align-items:center;margin:9px 0}
+.barbg{height:18px;background:#eef2f6;border-radius:20px;overflow:hidden}.bar{height:100%;background:#55b7ff;border-radius:20px}
+.small{text-align:center;font-size:13px;color:#587084}
+footer{text-align:center;padding:20px;font-weight:700}
+@media(max-width:800px){.wrap{grid-template-columns:1fr}.stats{grid-column:auto}.moods{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<header>
+<h1>🎡 Roda Emosi</h1>
+<div class="subtitle">& Mood Check-In • Jom kenali perasaan kita hari ini!</div>
+</header>
+
+<main class="wrap">
+<section class="card">
+<h2>Putar Roda Emosi</h2>
+<div class="wheelbox"><div class="pointer">▼</div><canvas id="wheel" width="600" height="600"></canvas></div>
+<div class="center">
+<button id="spin">🎡 PUTAR RODA</button>
+<div class="result" id="spinResult">Tekan butang untuk mula!</div>
+</div>
+</section>
+
+<section class="card">
+<h2>😊 Mood Check-In Saya</h2>
+<label>Kelas</label>
+<input id="kelas" placeholder="Contoh: 4 Bestari">
+<label>Hari ini saya berasa...</label>
+<div class="moods" id="moods"></div>
+<label>Mengapa saya berasa begini? <span style="font-weight:normal">(pilihan)</span></label>
+<textarea id="reason" placeholder="Saya berasa begini kerana..."></textarea>
+<div class="center"><button id="submit">💛 HANTAR MOOD SAYA</button></div>
+<div class="message" id="message">Terima kasih berkongsi perasaan anda. Semua emosi adalah penting. 🌈</div>
+<div class="starbox">
+  <div><b>⭐ Bintang Mood Saya</b></div>
+  <div class="starcount" id="starDisplay">☆☆☆☆☆</div>
+  <div class="reward" id="rewardText">Buat Mood Check-In untuk kumpul bintang!</div>
+</div>
+</section>
+
+<section class="card stats">
+<h2>📊 Mood Kelas Hari Ini</h2>
+<div id="stats"></div>
+<p class="small">Versi ini menyimpan respons pada peranti/browser yang sama sahaja. Tiada nama murid diperlukan.</p>
+<div class="center"><button id="reset" style="background:#ffb4b4">Reset Demo</button></div>
+</section>
+</main>
+<footer>Kenali Emosi • Jaga Diri • Jadi Lebih Baik ❤️</footer>
+
+<script>
+const emotions=[
+ {name:"Gembira",emoji:"😊",color:"#70d65c"},
+ {name:"Teruja",emoji:"🤩",color:"#ff9f43"},
+ {name:"Bangga",emoji:"😄",color:"#44c767"},
+ {name:"Tenang",emoji:"😌",color:"#54b9ff"},
+ {name:"Penat",emoji:"😴",color:"#6fa8dc"},
+ {name:"Sedih",emoji:"😢",color:"#8d72e1"},
+ {name:"Cemas",emoji:"😟",color:"#ff79b0"},
+ {name:"Marah",emoji:"😠",color:"#ff5d5d"}
+];
+const canvas=document.getElementById("wheel"),ctx=canvas.getContext("2d");
+let rotation=0,spinning=false,selected=null;
+function draw(){
+ const cx=300,cy=300,r=280,n=emotions.length,arc=2*Math.PI/n;
+ ctx.clearRect(0,0,600,600);ctx.save();ctx.translate(cx,cy);ctx.rotate(rotation);
+ emotions.forEach((e,i)=>{
+  const a=i*arc-Math.PI/2;
+  ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,r,a,a+arc);ctx.closePath();
+  ctx.fillStyle=e.color;ctx.fill();ctx.strokeStyle="#fff";ctx.lineWidth=6;ctx.stroke();
+  ctx.save();ctx.rotate(a+arc/2);ctx.translate(r*.63,0);ctx.rotate(Math.PI/2);
+  ctx.fillStyle="#17324d";ctx.font="bold 25px Arial";ctx.textAlign="center";
+  ctx.fillText(e.emoji,0,-10);ctx.fillText(e.name,0,24);ctx.restore();
+ });
+ ctx.beginPath();ctx.arc(0,0,65,0,2*Math.PI);ctx.fillStyle="#ffd43b";ctx.fill();ctx.strokeStyle="#fff";ctx.lineWidth=8;ctx.stroke();
+ ctx.fillStyle="#17324d";ctx.font="42px Arial";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("😊",0,3);
+ ctx.restore();
+}
+draw();
+document.getElementById("spin").onclick=()=>{
+ if(spinning)return; spinning=true;
+ const extra=5+Math.floor(Math.random()*4),target=Math.random()*Math.PI*2,start=rotation,end=rotation+extra*Math.PI*2+target,dur=2600,t0=performance.now();
+ function anim(t){let p=Math.min(1,(t-t0)/dur),ease=1-Math.pow(1-p,3);rotation=start+(end-start)*ease;draw();
+  if(p<1)requestAnimationFrame(anim);else{spinning=false;rotation%=2*Math.PI;
+   const arc=2*Math.PI/emotions.length;
+   let angle=((Math.PI*2-rotation)%(Math.PI*2));
+   let idx=Math.floor((angle+arc/2)/arc)%emotions.length;
+   document.getElementById("spinResult").textContent="Roda memilih: "+emotions[idx].emoji+" "+emotions[idx].name+" — bolehkah anda ceritakan bila anda rasa begini?";
+  }}
+ requestAnimationFrame(anim);
+};
+const moods=document.getElementById("moods");
+emotions.forEach((e,i)=>{let d=document.createElement("div");d.className="mood";d.innerHTML=`<div class="emoji">${e.emoji}</div><div class="label">${e.name}</div>`;
+ d.onclick=()=>{document.querySelectorAll(".mood").forEach(x=>x.classList.remove("selected"));d.classList.add("selected");selected=i};moods.appendChild(d)});
+function getData(){return JSON.parse(localStorage.getItem("moodData")||"[]")}
+function renderStats(){let data=getData(),counts=Array(emotions.length).fill(0);data.forEach(x=>counts[x.mood]++);let max=Math.max(1,...counts);
+ document.getElementById("stats").innerHTML=emotions.map((e,i)=>`<div class="barrow"><b>${e.emoji} ${e.name}</b><div class="barbg"><div class="bar" style="width:${counts[i]/max*100}%"></div></div><b>${counts[i]}</b></div>`).join("")}
+function getStars(){return Math.min(5,parseInt(localStorage.getItem("moodStars")||"0"))}
+function renderStars(){
+ let s=getStars();
+ document.getElementById("starDisplay").textContent="★".repeat(s)+"☆".repeat(5-s);
+ document.getElementById("rewardText").textContent=s>=5?"🏆 Hebat! Anda Bintang Emosi!":s>=3?"🌟 Syabas! Terus kenali emosi anda.":"Kumpul "+(5-s)+" bintang lagi!";
+}
+document.getElementById("submit").onclick=()=>{if(selected===null){alert("Sila pilih satu emosi dahulu.");return}
+ let data=getData();data.push({mood:selected,kelas:document.getElementById("kelas").value.trim(),reason:document.getElementById("reason").value.trim(),time:new Date().toISOString()});
+ localStorage.setItem("moodData",JSON.stringify(data));
+ let stars=Math.min(5,getStars()+1);localStorage.setItem("moodStars",stars);
+ document.getElementById("message").innerHTML="⭐ Tahniah! Anda mendapat <b>1 Bintang Mood</b> kerana berani mengenali dan berkongsi emosi. 🌈";
+ document.getElementById("message").style.display="block";
+ document.getElementById("reason").value="";selected=null;
+ document.querySelectorAll(".mood").forEach(x=>x.classList.remove("selected"));
+ renderStats();renderStars()}
+document.getElementById("reset").onclick=()=>{if(confirm("Padam semua respons demo dan bintang pada peranti ini?")){localStorage.removeItem("moodData");localStorage.removeItem("moodStars");renderStats();renderStars()}}
+renderStats();renderStars();
+</script>
+</body>
+</html>

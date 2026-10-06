@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kuiz Minda Sihat | KLIK & CERIA 2026</title>
+<style>
+:root{--p:#7c3aed;--b:#2563eb;--c:#06b6d4;--ink:#18223a;--ok:#16a34a;--bad:#dc2626}
+*{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:var(--ink);
+background:linear-gradient(135deg,#f5f3ff,#ecfeff 55%,#eff6ff);min-height:100vh}
+.wrap{max-width:900px;margin:auto;padding:24px}.hero,.card{background:#ffffffdd;backdrop-filter:blur(8px);border:1px solid #fff;
+border-radius:28px;box-shadow:0 18px 50px #4f46e51c}.hero{padding:28px;text-align:center;margin-bottom:18px}
+.badge{display:inline-block;background:#ede9fe;color:#6d28d9;padding:7px 13px;border-radius:999px;font-weight:800}
+h1{font-size:clamp(30px,6vw,52px);margin:10px 0 4px;color:#6d28d9} .sub{font-weight:700;color:#475569}
+.card{padding:24px}.start{text-align:center}.emoji{font-size:72px}.field{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0}
+input{width:100%;padding:14px;border:2px solid #ddd6fe;border-radius:15px;font-size:16px}
+button{border:0;border-radius:16px;padding:14px 20px;font-size:16px;font-weight:800;cursor:pointer}
+.primary{background:linear-gradient(90deg,var(--p),var(--b));color:white;box-shadow:0 8px 20px #6d28d944}
+.progress{height:14px;background:#e2e8f0;border-radius:99px;overflow:hidden}.bar{height:100%;width:0;background:linear-gradient(90deg,var(--c),var(--p));transition:.35s}
+.top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:12px;font-weight:800}
+.q{font-size:23px;font-weight:850;margin:22px 0}.opts{display:grid;gap:12px}
+.opt{background:white;border:2px solid #cbd5e1;text-align:left;color:#000!important;font-weight:800}.opt:hover{border-color:#8b5cf6;background:#faf5ff}
+.opt.good{border-color:#22c55e;background:#f0fdf4;color:#000!important}.opt.bad{border-color:#ef4444;background:#fef2f2;color:#000!important}
+.feedback{margin-top:16px;padding:14px;border-radius:14px;background:#f8fafc;font-weight:700;min-height:52px}
+.actions{display:flex;justify-content:flex-end;margin-top:16px}.hidden{display:none!important}
+.result{text-align:center}.score{font-size:64px;font-weight:900;color:#7c3aed;margin:8px}.stars{font-size:36px;letter-spacing:4px}
+.cert{margin-top:20px;border:5px double #8b5cf6;border-radius:20px;padding:28px;background:white}.cert h2{color:#6d28d9;font-size:32px}
+.small{color:#64748b;font-size:14px}.footer{text-align:center;margin:20px;color:#64748b;font-size:13px}
+@media(max-width:600px){.field{grid-template-columns:1fr}.wrap{padding:12px}.card{padding:18px}.q{font-size:20px}}
+@media print{body{background:white}.hero,#start,#quiz,#result>.noPrint,.footer{display:none!important}#result{display:block!important}.wrap{max-width:100%;padding:0}.card{box-shadow:none;border:0}.cert{margin:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<section class="hero">
+<span class="badge">KLIK & CERIA CHALLENGE 2026</span>
+<h1>🧠 Kuiz Minda Sihat</h1>
+<div class="sub">Fikir Positif • Kenali Emosi • Jadi Sahabat Yang Baik</div>
+</section>
+
+<section id="start" class="card start">
+<div class="emoji">🌈🧠✨</div>
+<h2>Selamat Datang, Juara!</h2>
+<p>Jawab 8 soalan. Kumpul markah dan menangi ⭐ Bintang Minda Sihat.</p>
+<div class="field"><input id="name" placeholder="Nama murid"><input id="kelas" placeholder="Kelas"></div>
+<button class="primary" onclick="begin()">🚀 MULA KUIZ</button>
+</section>
+
+<section id="quiz" class="card hidden">
+<div class="top"><span id="counter"></span><span>🏆 Skor: <b id="score">0</b></span></div>
+<div class="progress"><div id="bar" class="bar"></div></div>
+<div id="question" class="q"></div>
+<div id="options" class="opts"></div>
+<div id="feedback" class="feedback">Pilih jawapan yang paling baik.</div>
+<div class="actions"><button id="next" class="primary hidden" onclick="nextQ()">Seterusnya ➜</button></div>
+</section>
+
+<section id="result" class="card result hidden">
+<div class="noPrint">
+<div class="emoji">🏆</div><h2>Tahniah!</h2>
+<div id="finalScore" class="score"></div><div id="stars" class="stars"></div>
+<p id="message"></p>
+<button class="primary" onclick="showCert()">🎖️ LIHAT SIJIL</button>
+<button onclick="location.reload()">🔄 MAIN SEMULA</button>
+</div>
+<div id="cert" class="cert hidden">
+<div style="font-size:64px">🏆🧠✨</div>
+<div class="small"><b>PROGRAM SEMPENA BULAN KAUNSELING KEBANGSAAN TAHUN 2026</b></div>
+<div style="margin-top:5px;color:#7c3aed;font-weight:800">KLIK & CERIA • KAUNSELING FUN ZONE</div>
+<h2 style="margin-bottom:4px">SIJIL PENCAPAIAN DIGITAL</h2>
+<h3 style="font-size:22px">🌟 BINTANG MINDA SIHAT 🌟</h3>
+<p>Dengan bangganya dianugerahkan kepada</p>
+<h2 id="certName" style="font-size:34px;color:#1d4ed8;text-transform:uppercase"></h2>
+<p>Kelas: <b id="certClass"></b></p>
+<p>kerana telah berjaya menamatkan <b>Kuiz Minda Sihat</b><br>
+serta menunjukkan kefahaman dalam mengenali emosi, pemikiran positif,<br>
+kesejahteraan diri dan hubungan yang baik dengan rakan.</p>
+<p id="certScore" style="font-size:18px"></p>
+<div style="margin:22px auto;width:75%;border-top:2px solid #ddd6fe;padding-top:14px">
+<b>UNIT BIMBINGAN DAN KAUNSELING<br>SK BANDAR SRI SENDAYAN</b>
+</div>
+<div class="small">Tema: Kaunseling Era Digital: Memacu Kesejahteraan</div><br>
+<button class="primary noPrint" onclick="window.print()">🖨️ CETAK / SIMPAN PDF</button>
+</div>
+</section>
+<div class="footer">💜 KLIK & CERIA • Kaunseling Era Digital: Memacu Kesejahteraan</div>
+</div>
+<script>
+const qs=[
+["Apabila kamu berasa sangat marah, apakah tindakan yang paling baik dilakukan dahulu?",["Tarik nafas perlahan dan cuba bertenang","Menjerit kepada kawan","Membaling barang","Menolak orang berhampiran"],0,
+"Menarik nafas perlahan memberi masa untuk kita bertenang sebelum bertindak."],
+["Kawan kamu kelihatan sedih ketika waktu rehat. Apakah tindakan yang paling baik?",["Ketawakan dia","Tanya keadaannya dengan baik dan tawarkan bantuan","Sebarkan kepada semua orang bahawa dia sedang sedih","Paksa dia menceritakan semuanya"],1,
+"Bertanya dengan baik menunjukkan empati dan memberi peluang kepada rakan mendapatkan sokongan."],
+["Jika seseorang membuli kamu berulang kali di sekolah, apakah tindakan yang paling selamat?",["Balas dengan membuli semula","Simpan semuanya sebagai rahsia","Beritahu guru, guru kaunseling atau orang dewasa yang dipercayai","Ajak kawan bergaduh dengan pembuli"],2,
+"Orang dewasa yang dipercayai boleh membantu menjaga keselamatan dan menangani situasi buli."],
+["Yang manakah satu cara yang sihat untuk menjaga kesejahteraan emosi?",["Memendam semua perasaan","Bercakap dengan orang yang dipercayai apabila mempunyai masalah","Mengejek orang lain","Merosakkan barang ketika marah"],1,
+"Berkongsi dengan orang yang dipercayai boleh membantu kita mendapatkan sokongan."],
+["Meminta bantuan daripada orang dewasa yang dipercayai apabila kita menghadapi masalah ialah tindakan yang baik.",["Betul","Salah","Hanya jika kawan suruh","Tidak perlu meminta bantuan"],0,
+"Meminta bantuan ialah tindakan yang baik apabila kita memerlukan sokongan."],
+["Kamu mendapat markah lebih rendah daripada yang diharapkan. Pemikiran manakah paling membantu?",["Saya memang tidak akan pandai","Saya boleh belajar daripada kesilapan dan cuba lagi","Saya mesti salahkan kawan","Saya tidak mahu mencuba lagi"],1,
+"Belajar daripada kesilapan membantu kita terus berkembang dan mencuba lagi."],
+["Jika seorang kawan melakukan kesilapan, apakah cara yang lebih baik untuk membantunya?",["Ejek di hadapan orang lain","Sebarkan kesalahannya","Bantu dan bercakap dengannya dengan sopan","Ketawakan dia bersama kawan"],2,
+"Membantu dengan sopan menjaga perasaan dan maruah rakan."],
+["Apabila kamu risau sebelum membuat pembentangan, apakah tindakan yang paling membantu?",["Tarik nafas, buat persediaan dan beri kata semangat kepada diri","Marah kepada rakan","Koyakkan bahan pembentangan","Katakan semuanya pasti gagal"],0,
+"Persediaan, pernafasan tenang dan kata-kata positif boleh membantu menghadapi rasa gementar."]
+];
+let i=0,points=0,locked=false, student="", kelas="";
+function begin(){
+ student=document.getElementById("name").value.trim()||"Murid Hebat";
+ kelas=document.getElementById("kelas").value.trim()||"-";
+ document.getElementById("start").classList.add("hidden");document.getElementById("quiz").classList.remove("hidden");render();
+}
+function render(){
+ locked=false; document.getElementById("next").classList.add("hidden");
+ document.getElementById("counter").textContent=`Soalan ${i+1} / ${qs.length}`;
+ document.getElementById("bar").style.width=`${i/qs.length*100}%`;
+ document.getElementById("question").textContent=qs[i][0];
+ document.getElementById("feedback").textContent="Pilih jawapan yang paling baik.";
+ const box=document.getElementById("options");box.innerHTML="";
+ qs[i][1].forEach((x,n)=>{let b=document.createElement("button");b.className="opt";b.textContent=`${String.fromCharCode(65+n)}. ${x}`;b.onclick=()=>answer(n,b);box.appendChild(b)});
+}
+function answer(n,b){
+ if(locked)return;locked=true;const correct=qs[i][2];const buttons=[...document.querySelectorAll(".opt")];
+ buttons[correct].classList.add("good");
+ if(n===correct){points++;document.getElementById("feedback").textContent="⭐ Hebat! "+qs[i][3]}
+ else{b.classList.add("bad");document.getElementById("feedback").textContent="💜 Cuba ingat: "+qs[i][3]}
+ document.getElementById("score").textContent=points;document.getElementById("next").classList.remove("hidden");
+}
+function nextQ(){i++; if(i<qs.length)render();else finish()}
+function finish(){
+ document.getElementById("quiz").classList.add("hidden");document.getElementById("result").classList.remove("hidden");
+ const pct=Math.round(points/qs.length*100);document.getElementById("finalScore").textContent=`${points} / ${qs.length}`;
+ let s=points>=7?"⭐⭐⭐⭐⭐":points>=5?"⭐⭐⭐⭐":points>=3?"⭐⭐⭐":"⭐⭐";
+ document.getElementById("stars").textContent=s;
+ document.getElementById("message").textContent=points>=7?"Cemerlang! Anda Bintang Minda Sihat!":points>=5?"Syabas! Minda anda semakin hebat!":"Bagus mencuba! Main semula untuk tingkatkan skor.";
+ document.getElementById("certName").textContent=student;document.getElementById("certClass").textContent=kelas;
+ document.getElementById("certScore").innerHTML=`Skor pencapaian: <b>${points}/${qs.length} (${pct}%)</b>`;
+}
+function showCert(){document.getElementById("cert").classList.remove("hidden");document.getElementById("cert").scrollIntoView({behavior:"smooth"})}
+</script>
+</body></html>
